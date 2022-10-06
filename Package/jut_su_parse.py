@@ -1,6 +1,6 @@
 import re
 from time import time
-from typing import Optional
+from typing import Optional, Tuple
 
 import progressbar
 import requests
@@ -33,7 +33,7 @@ def check_time(*a_args, **k_kwargs):
     return name_func
 
 
-def check_anime_global(link: str) -> Optional[BeautifulSoup, bool]:
+def (link: str) -> Tuple[BeautifulSoup, bool]:
     anime_global = False
     links.clear()
     req = requests.get(link, headers=headers)
