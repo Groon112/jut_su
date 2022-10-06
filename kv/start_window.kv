@@ -1,0 +1,115 @@
+#:import Snackbar kivymd.uix.snackbar.Snackbar
+<Main>:
+    MDBoxLayout:
+        id: main_box
+        padding: 10
+        orientation:'vertical'
+        spacing: 10
+
+        MDBoxLayout:
+            size_hint: (1, .25)
+            Image:
+                source: "../Sources/logo.dark.png"
+
+        MDBoxLayout:
+            spacing: 5
+            size_hint: (1, .1)
+            orientation:'horizontal'
+
+            MDTextField:
+                id: input_name
+                hint_text: "Вставьте ссылку на серию"
+                line_color_normal: "gray"
+                line_color_focus: "gray"
+                hint_text_color_focus: "gray"
+                text_color_focus: "gray"
+                mode: "rectangle"
+                multiline: False
+                on_text_validate:
+                    root.manager.transition.direction = 'left'
+                    root.find_by_link()
+            MDRectangleFlatButton:
+                id: find_button
+                text: 'Найти'
+                line_color: "gray"
+                text_color: "gray"
+                on_press:
+                    root.manager.transition.direction = 'left'
+                    root.find_by_link()
+
+        ScrollView:
+            height:root.height*0.8
+            scroll_type: ["bars", "content"]
+            bar_width: 5
+            smooth_scroll_end: 10
+            always_overscroll: False
+            RelativeLayout:
+                id: favourites_list
+                size_hint_y:None
+
+<Second>:
+    BoxLayout:
+        id: box
+        orientation:'vertical'
+        spacing: 10
+        MDTopAppBar:
+            id: ani
+            md_bg_color: "gray"
+            left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
+            right_action_items: [["", lambda x: root.add_favourite()],["dots-vertical", lambda x: root.callback(x)]]
+
+        ScrollView:
+            height:root.height*0.8
+            smooth_scroll_end: 10
+            always_overscroll: False
+            bar_width: 5
+            RelativeLayout:
+                id: season_list
+                size_hint_y:None
+                padding: 10
+
+
+<Third>:
+    BoxLayout:
+        id: series_list
+        orientation:'vertical'
+        spacing: 10
+        MDTopAppBar:
+            id: ani
+            md_bg_color: "gray"
+            left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
+            right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
+
+        ScrollView:
+            scroll_type: ["bars", "content"]
+            always_overscroll: False
+            height:root.height*0.8
+            smooth_scroll_end: 10
+            bar_width: 5
+#            GridLayout:
+#                id: series_list
+#                size_hint_y:None
+#                cols: 4
+            MDSelectionList:
+                id: series_list
+                padding: 10
+                cols: 4
+                progress_round_size: 0
+#                spacing: 10
+                overlay_color: root.overlay_color[:-1] + [.1]
+                icon_bg_color: "#bcbcbc"
+                progress_round_color: root.progress_round_color
+                on_selected: root.on_selected(*args)
+                on_unselected: root.on_unselected(*args)
+                on_selected_mode: root.set_selection_mode(*args)
+
+<Fourth>:
+    BoxLayout:
+        padding:10
+        orientation:'vertical'
+        Button:
+            text: 'HOME'
+            on_press:root.manager.current='first'
+        GridLayout:
+            cols:3
+            id:this_layout

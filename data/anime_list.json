@@ -1,0 +1,45 @@
+{
+    "film_list": [
+        {
+            "name": "Наруто",
+            "link": "https://jut.su/naruuto/",
+            "last_series": ""
+        },
+        {
+            "name": "Сделано в Бездне",
+            "link": "https://jut.su/made-abyss/",
+            "last_series": ""
+        },
+        {
+            "name": "Токийский Гуль",
+            "link": "https://jut.su/tokushu/",
+            "last_series": ""
+        },
+        {
+            "name": "Прославленный",
+            "link": "https://jut.su/utawarerumono/",
+            "last_series": ""
+        },
+        {
+            "name": "Покемон",
+            "link": "https://jut.su/pokemon/",
+            "last_series": ""
+        },
+        {
+            "name": "Принц тенниса",
+            "link": "https://jut.su/tennis-no-ouji-sama/",
+            "last_series": ""
+        },
+        {
+            "name": "Ванпанчмен",
+            "link": "https://jut.su/onepunchman/",
+            "last_series": ""
+        },
+        {
+            "name": "Ван Пис",
+            "link": "https://jut.su/oneepiece/",
+            "last_series": ""
+        }
+    ],
+    "select_anime": "Ванпис"
+}
