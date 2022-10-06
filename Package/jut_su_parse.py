@@ -162,7 +162,6 @@ def dwn(video):
             f = open(f'onepiece-{name}.mp4', 'wb')
             for chunk in d_video.iter_content(chunk_size=8192):
                 f.write(chunk)
-                # print(str(i) + '/' + str(file_size), end="\r")
                 bar.update(i)
                 i += 8192
             f.close()
