@@ -32,7 +32,7 @@ def check_time(*a_args, **k_kwargs):
     return name_func
 
 
-def check_anime_global(link):
+def check_anime_global(link: str):
     anime_global = False
     links.clear()
     req = requests.get(link, headers=headers)
