@@ -33,7 +33,7 @@ def check_time(*a_args, **k_kwargs):
     return name_func
 
 
-def (link: str) -> Tuple[BeautifulSoup, bool]:
+def check_anime_global(link: str) -> Tuple[BeautifulSoup, bool]:
     anime_global = False
     links.clear()
     req = requests.get(link, headers=headers)
