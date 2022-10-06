@@ -1,11 +1,12 @@
 import re
 from time import time
+from typing import Optional
+
 import progressbar
 import requests
 import tqdm
 from bs4 import BeautifulSoup
 from datetime import datetime
-# from data.test import write_json
 import json
 
 links = {}
@@ -32,7 +33,7 @@ def check_time(*a_args, **k_kwargs):
     return name_func
 
 
-def check_anime_global(link: str):
+def check_anime_global(link: str) -> Optional[BeautifulSoup, bool]:
     anime_global = False
     links.clear()
     req = requests.get(link, headers=headers)
@@ -50,13 +51,12 @@ def check_anime_global(link: str):
     return soup, anime_global
 
 
-def get_episodes(soup, anime_global):
+def get_episodes(soup: Optional[BeautifulSoup], anime_global: bool):
     """
     # Аниме_глобал - это Наруто. Мб найду что-то ещё.
     # По умолчанию False. В данном случае на одной странице все ссылки на серии.
     # Парсим именно их
     """
-    temp_dict = {}
     if not anime_global:
         try:
             episodes = soup.findAll('a', class_="short-btn")
@@ -82,10 +82,9 @@ def get_episodes(soup, anime_global):
                 if season_titles[season_title - 1] not in links.keys():
                     # Минус 1, т.к. s_title - это номер сезона. s_titles же - список сезонов.
                     # Чтобы найти нужный - вычитаем 1, т.к. отсчёт идёт с нуля.
-                    # links.update({season: {season: season_titles[season_title - 1], "episode_list": []}})
-                    links.update({season_titles[season_title - 1]: {"name": season_titles[season_title - 1], 'series': {}}})
-                # links[season]['episode_list'].append({"link": link_episode, "name": episode_title})
-                links[season_titles[season_title-1]]['series'].update({episode_title: link_episode})
+                    links.update(
+                        {season_titles[season_title - 1]: {"name": season_titles[season_title - 1], 'series': {}}})
+                links[season_titles[season_title - 1]]['series'].update({episode_title: link_episode})
 
             elif re.search(r'film-\d+', link_episode):
                 if season_titles[-1] not in links.keys():
@@ -98,8 +97,6 @@ def get_episodes(soup, anime_global):
 
     else:
         seasons = soup.find_all('div', class_='all_anime_global')
-        links_anime_global = []
-
         for season_global in seasons:
             season_title = season_global.find('div', class_='aaname').text \
                 .replace(season_global.find('span', class_='the_invis').text, '')
@@ -126,7 +123,6 @@ def get_episodes(soup, anime_global):
                 if "https://jut.su" not in link_episode:
                     link_episode = "https://jut.su" + link_episode
                 links[season_title]['series'].update({episode_title: link_episode})
-        # write_json('series_list.json', links)
         return links
 
     if not links:
@@ -135,19 +131,7 @@ def get_episodes(soup, anime_global):
         return links
 
 
-def get_link(episode_list):  # DOPILIT
-    if episode_list.isdecimal():
-        link = links[int(episode_list) - 1]
-        return get_download_link(link)
-    else:
-        list_links = re.split(r'\D', episode_list)
-        list_links = [links[i] for i in range(int(list_links[0]) - 1, int(list_links[-1]))]
-        for i in list_links:
-            get_download_link(i)
-        return down_links
-
-
-def get_download_link(link):
+def get_download_link(link: str) -> str:
     req1 = requests.get(link, headers=headers)
     soup = BeautifulSoup(req1.content, 'html.parser')
     try:
@@ -161,7 +145,7 @@ def get_download_link(link):
             download_link = soup.find("source", attrs={"label": "360p"}).get('src')
         else:
             exit()
-            return
+            return ''
     except AttributeError:
         return "Данное видео недоступно для РФ или отсутствуюет"
 
@@ -183,24 +167,10 @@ def dwn(video):
                 bar.update(i)
                 i += 8192
             f.close()
-    # elif isinstance(video, str):
-    #     d_video = requests.get(video, stream=True, headers=headers)
-    #     file_size = int(d_video.headers['Content-Length'])
-    #     chunk = 1
-    #     nub_bars = file_size / chunk
-    #     bar = progressbar.ProgressBar(maxval=nub_bars).start()
-    #     i = 0
-    #     f = open('one.mp4', 'wb')
-    #     for chunk in d_video.iter_content(chunk_size=8192):
-    #         f.write(chunk)
-    #         # print(str(i) + '/' + str(file_size), end="\r")
-    #         bar.update(i)
-    #         i += 8192
-    #     f.close()
 
 
 @check_time('main', 'jut_su_parse.py')
-def main(start_link):
+def main(start_link: str) -> Optional[dict]:
     if re.fullmatch(r'https://jut\.su/.+/', start_link):
         soup, a_global = check_anime_global(start_link)
         if not get_episodes(soup, a_global):

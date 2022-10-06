@@ -3,11 +3,8 @@ from kivy.properties import ColorProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 from kivy.uix.button import Button
-from kivy.uix.label import Label
 from kivy.lang import Builder
-from kivy.app import App
 from kivymd.app import MDApp
-from kivy.uix.popup import Popup
 import json
 
 from kivymd.uix.menu import MDDropdownMenu
@@ -18,7 +15,6 @@ from kivymd.uix.snackbar import Snackbar
 from kivymd.theming import ThemeManager
 from kivy.metrics import dp
 
-# Window.maximize()
 Builder.load_file("../kv/start_window.kv")
 BUTTON_HEIGHT = 50
 series_dict = {}
@@ -61,14 +57,11 @@ class Main(Screen):
 
     def pressing(self, instance):
         global series_dict
-        # anime_list = load_json('anime_list.json')
-        for i in anime_dict['film_list']:  # anime_list['film_list']:
+        for i in anime_dict['film_list']:
             if i['name'] == instance.text:
                 data = j_parse.main(i['link'])
                 if data:
-                    # write_json('series_list.json', a)  # Попробую загнать всё в переменную, а не файл
                     series_dict = data
-                    # write_json('new.json', series_dict)
                     self.manager.transition.direction = 'left'
                     self.manager.current = 'second'
                 else:
@@ -79,7 +72,6 @@ class Main(Screen):
         global series_dict
         a = j_parse.main(self.ids.input_name.text)
         if a:
-            # write_json('series_list.json', a)
             series_dict = a
             self.manager.current = 'second'
         else:
@@ -135,8 +127,6 @@ class Second(Screen):
         global series_dict
         if self.manager.current != 'Second':
             series_dict["select_season"] = instance.text
-            # write_json('series_list.json', self.series_list)
-            # series_dict.update(self.series_list)
             self.manager.transition.direction = 'left'
             if len(series_dict[instance.text]['series'].keys()) > 50:
                 self.manager.current = 'fourth'
@@ -144,7 +134,6 @@ class Second(Screen):
                 self.manager.current = self.manager.next()
 
     def on_leave(self):
-        # self.ids.anime_name.text = ''
         self.ids.season_list.clear_widgets()
         self.ids.ani.title = ''
 
@@ -154,8 +143,6 @@ class Second(Screen):
             self.manager.current = self.manager.previous()
 
     def add_favourite(self):
-        # self.anime_list = anime_dict  # load_json('anime_list.json')
-        # self.series_list = series_dict  # load_json('series_list.json')
         temp_dict = {"name": series_dict['name'],
                      "link": series_dict['link'],
                      "last_series": series_dict['last_series']}
@@ -170,7 +157,6 @@ class Second(Screen):
             self.ids.ani.right_action_items = [["star-outline", lambda x: self.add_favourite()],
                                                ["dots-vertical", lambda x: x]]
         write_json('anime_list.json', anime_dict)
-        # anime_dict.update(self.anime_list)
 
     def callback(self, button):
         self.menu.caller = button
@@ -213,8 +199,6 @@ class Third(Screen):
     @j_parse.check_time('third enter')
     def on_enter(self, *args):
         select_season = None
-        # self.series_list = series_dict  # load_json('series_list.json')
-        # self.ids.season_name.text = series_dict['select_season']
         self.ids.ani.title = series_dict['select_season']
         series_list = list(series_dict.keys())[5:]
         for season in series_list:
@@ -227,9 +211,6 @@ class Third(Screen):
             if len(series) > 29 and self.ids.series_list.cols != 1:
                 self.ids.series_list.cols = 1
             b_height -= BUTTON_HEIGHT
-            # self.ids.series_list.add_widget(Button(text=series, on_press=self.pressing, size_hint=(1, None),
-            #                                        height=BUTTON_HEIGHT, pos=(0, b_height)))
-
             self.ids.series_list.add_widget(Button(text=series, on_release=self.pressing, size_hint=(1, None),
                                                    height=BUTTON_HEIGHT))
 
@@ -243,7 +224,6 @@ class Third(Screen):
         if self.manager.current != 'Second':
             series_dict["select_series"] = instance.text
             self.manager.transition.direction = 'left'
-            # self.manager.current = self.manager.next()
 
     def on_leave(self):
         self.ids.series_list.clear_widgets()
@@ -277,7 +257,6 @@ class Third(Screen):
             right_action_items = [["download", lambda x: self.download(x)], ["dots-vertical"]]
         else:
             md_bg_color = self.default_color
-            print(md_bg_color)
             left_action_items = [["arrow-left", lambda x: self.set_previous_screen()]]
             right_action_items = [["magnify", lambda x: self.download(x)],
                                   ["dots-vertical", lambda x: self.callback(x)]]
@@ -292,7 +271,6 @@ class Third(Screen):
             len(instance_selection_list.get_selected_list_items())
         )
         self.selection_series = instance_selection_list.get_selected_list_items()
-        print(instance_selection_item.instance_item.text)
 
     def on_unselected(self, instance_selection_list, instance_selection_item):
         if instance_selection_list.get_selected_list_items():
