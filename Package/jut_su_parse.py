@@ -1,5 +1,4 @@
 import re
-from time import time
 from typing import Optional, Tuple
 
 import progressbar
