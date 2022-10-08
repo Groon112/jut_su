@@ -75,6 +75,7 @@ class Main(Screen):
             series_dict = a
             self.manager.current = 'second'
         else:
+            print('bad')
             bad_link()
 
 
