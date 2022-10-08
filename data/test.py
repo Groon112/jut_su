@@ -162,7 +162,7 @@ class Second(Screen):
         self.menu.caller = button
         self.menu.open()
 
-    def menu_callback(self, text_item):
+    def menu_callback(self, text_item: str):
         self.menu.dismiss()
         print(text_item)
 

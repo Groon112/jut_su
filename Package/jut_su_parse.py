@@ -14,12 +14,12 @@ headers = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
                          "Chrome/99.0.4844.84 Safari/537.36 OPR/85.0.4341.79"}
 
 
-def write_json(file_name, value):
+def write_json(file_name: str, value: dict):
     with open(f'{file_name}', 'w', encoding='utf-8') as f:
         json.dump(value, fp=f, ensure_ascii=False, indent=4)
 
 
-def check_time(*a_args, **k_kwargs):
+def check_time(*a_args):
     def name_func(func):
         def wrapper(*args, **kwargs):
             start = datetime.now()
@@ -50,7 +50,7 @@ def check_anime_global(link: str) -> Tuple[BeautifulSoup, bool]:
     return soup, anime_global
 
 
-def get_episodes(soup: Optional[BeautifulSoup], anime_global: bool):
+def get_episodes(soup: BeautifulSoup, anime_global: bool) -> Optional[dict]:
     """
     # Аниме_глобал - это Наруто. Мб найду что-то ещё.
     # По умолчанию False. В данном случае на одной странице все ссылки на серии.
@@ -151,7 +151,7 @@ def get_download_link(link: str) -> str:
     return download_link
 
 
-def dwn(video):
+def dwn(video: list):
     if isinstance(video, list):
         for link in tqdm.tqdm(video):
             d_video = requests.get(link, stream=True, headers=headers)
