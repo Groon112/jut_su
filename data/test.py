@@ -1,10 +1,11 @@
 from kivy.animation import Animation
-from kivy.properties import ColorProperty
+from kivy.properties import ColorProperty, ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
 from kivy.uix.button import Button
 from kivy.lang import Builder
 from kivymd.app import MDApp
+from kivymd.uix.recycleview import MDRecycleView
 import json
 
 from kivymd.uix.menu import MDDropdownMenu
@@ -288,11 +289,45 @@ class Fourth(Screen):  # Для примера. Нужно переделать
             '1', '2', '3',
             'None', '0', 'None',
         ]
-        for i in self.list_buttons:
-            self.ids.this_layout.add_widget(Button(text=i, on_press=self.pressing))
+
+    def on_enter(self, *args):
+        self.ids.series_list.refreshView()
+        self.ids.ani.title = series_dict['select_season']
 
     def pressing(self, instance):
-        self.manager.current = 'first'
+        self.manager.current = 'third'
+
+    def set_previous_screen(self):
+        if self.manager.current != 'third':
+            self.manager.transition.direction = 'right'
+            self.manager.current = 'second'
+
+    def callback(self, button):
+        pass
+
+
+class CustomButton(Button):
+    root_widget = ObjectProperty()
+
+    def on_release(self, **kwargs):
+        super(CustomButton, self).on_release(**kwargs)
+        self.root_widget.select_series(self.text)
+
+
+class ScrollerSeries(MDRecycleView):
+    def __init__(self, **kwargs):
+        super(ScrollerSeries, self).__init__(**kwargs)
+
+    def refreshView(self):
+        select_season = None
+        series_list = list(series_dict.keys())[5:]
+        for season in series_list:
+            if series_dict['select_season'] == series_dict[season]['name']:
+                select_season = series_dict[season]['series']
+        self.data = [{"text": series, "root_widget": self} for series in select_season]
+
+    def select_series(self, text):
+        print(text)
 
 
 class TestApp(MDApp):

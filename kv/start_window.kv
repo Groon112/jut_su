@@ -103,13 +103,32 @@
                 on_unselected: root.on_unselected(*args)
                 on_selected_mode: root.set_selection_mode(*args)
 
+<ScrollerSeries>:
+    viewclass: "CustomButton"
+    bar_width: 5
+    always_overscroll: False
+    scroll_type: ["bars", "content"]
+    spacing: 10
+    RecycleGridLayout:
+        cols: 5
+        default_size: None, 50
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        padding: 10
+
+
+
 <Fourth>:
+    scrollName: series_list
     BoxLayout:
-        padding:10
+        id: series_list
         orientation:'vertical'
-        Button:
-            text: 'HOME'
-            on_press:root.manager.current='first'
-        GridLayout:
-            cols:3
-            id:this_layout
+        MDTopAppBar:
+            id: ani
+            md_bg_color: "gray"
+            left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
+            right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
+
+        ScrollerSeries:
+            id: series_list
