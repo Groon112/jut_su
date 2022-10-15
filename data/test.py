@@ -199,6 +199,7 @@ class Third(Screen):
 
     @j_parse.check_time('third enter')
     def on_enter(self, *args):
+        self.ids.svw.scroll_y = 1
         select_season = None
         self.ids.ani.title = series_dict['select_season']
         series_list = list(series_dict.keys())[5:]
@@ -294,6 +295,10 @@ class Fourth(Screen):  # Для примера. Нужно переделать
         self.ids.series_list.refreshView()
         self.ids.ani.title = series_dict['select_season']
 
+    def on_leave(self, *args):
+        self.ids.series_list.scroll_y = 1
+        self.ids.ani.title = ''
+
     def pressing(self, instance):
         self.manager.current = 'third'
 
@@ -310,7 +315,7 @@ class CustomButton(Button):
     root_widget = ObjectProperty()
 
     def on_release(self, **kwargs):
-        super(CustomButton, self).on_release(**kwargs)
+        super(CustomButton, self).on_release()
         self.root_widget.select_series(self.text)
 
 
