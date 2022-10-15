@@ -6,6 +6,10 @@ from kivy.uix.button import Button
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.uix.recycleview import MDRecycleView
+from kivymd.uix.behaviors.focus_behavior import FocusBehavior
+from kivy.uix.recycleview.layout import LayoutSelectionBehavior
+from kivymd.uix.recyclegridlayout import MDRecycleGridLayout
+
 import json
 
 from kivymd.uix.menu import MDDropdownMenu
@@ -207,7 +211,7 @@ class Third(Screen):
             if series_dict['select_season'] == series_dict[season]['name']:
                 select_season = series_dict[season]['series']
 
-        b_height = ceil((len(select_season)/4)) * BUTTON_HEIGHT
+        b_height = ceil((len(select_season) / 4)) * BUTTON_HEIGHT
         self.ids.series_list.height = b_height + 5
         for series in select_season:
             if len(series) > 29 and self.ids.series_list.cols != 1:
@@ -233,6 +237,7 @@ class Third(Screen):
 
     def download(self, link_list):
         s = [i.instance_item.text for i in self.selection_series]
+        print(link_list)
         print(s)
 
     def select_all(self, item):
@@ -333,6 +338,12 @@ class ScrollerSeries(MDRecycleView):
 
     def select_series(self, text):
         print(text)
+
+
+class SelectableRecycleGridLayout(FocusBehavior, LayoutSelectionBehavior, MDRecycleGridLayout):
+    """
+    : test class :
+    """
 
 
 class TestApp(MDApp):
