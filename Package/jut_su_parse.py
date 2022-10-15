@@ -19,7 +19,7 @@ def write_json(file_name: str, value: dict):
         json.dump(value, fp=f, ensure_ascii=False, indent=4)
 
 
-def check_time(*a_args):
+def check_time(*a_args: str) -> any:
     def name_func(func):
         def wrapper(*args, **kwargs):
             start = datetime.now()
