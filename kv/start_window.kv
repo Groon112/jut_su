@@ -115,18 +115,46 @@
         height: self.minimum_height
         padding: 10
 
+#<Fourth>:
+#    scrollName: series_list
+#    BoxLayout:
+#        id: series_list
+#        orientation:'vertical'
+#        MDTopAppBar:
+#            id: ani
+#            md_bg_color: "gray"
+#            left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
+#            right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
+#
+#        ScrollerSeries:
+#            id: series_list
 
+<SelectableLabel>:
+    # Draw a background to indicate selection
+    background_color: (.8, .8, .8, .5) if self.selected else (1, 1, 1, 1)
 
-<Fourth>:
-    scrollName: series_list
+<RV>:
+
+    viewclass: 'SelectableLabel'
+    SelectableRecycleGridLayout:
+        id: scroll_rec_grid_lay
+        spacing: 1
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        cols: 5
+        size_hint_y: None
+        height: self.minimum_height
+        multiselect: True
+        touch_multiselect: True
+
+<RVScreen>:
     BoxLayout:
-        id: series_list
-        orientation:'vertical'
+        orientation: "vertical"
+        spacing: 10
         MDTopAppBar:
             id: ani
             md_bg_color: "gray"
             left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
             right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
-
-        ScrollerSeries:
+        RV:
             id: series_list
