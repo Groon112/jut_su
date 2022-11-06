@@ -1,9 +1,9 @@
 import re
 from typing import Optional, Tuple
 
-import progressbar
+# import progressbar
 import requests
-import tqdm
+# import tqdm
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json
@@ -151,20 +151,20 @@ def get_download_link(link: str) -> str:
     return download_link
 
 
-def dwn(video: list):
-    if isinstance(video, list):
-        for link in tqdm.tqdm(video):
-            d_video = requests.get(link, stream=True, headers=headers)
-            file_size = int(d_video.headers['Content-Length'])
-            bar = progressbar.ProgressBar(maxval=file_size).start()
-            i = 0
-            name = str(re.search(r'\d+\.(1080|720|480|360)', str(link)).group())  # Допилить регулярки
-            f = open(f'onepiece-{name}.mp4', 'wb')
-            for chunk in d_video.iter_content(chunk_size=8192):
-                f.write(chunk)
-                bar.update(i)
-                i += 8192
-            f.close()
+# def dwn(video: list):
+#     if isinstance(video, list):
+#         for link in tqdm.tqdm(video):
+#             d_video = requests.get(link, stream=True, headers=headers)
+#             file_size = int(d_video.headers['Content-Length'])
+#             bar = progressbar.ProgressBar(maxval=file_size).start()
+#             i = 0
+#             name = str(re.search(r'\d+\.(1080|720|480|360)', str(link)).group())  # Допилить регулярки
+#             f = open(f'onepiece-{name}.mp4', 'wb')
+#             for chunk in d_video.iter_content(chunk_size=8192):
+#                 f.write(chunk)
+#                 bar.update(i)
+#                 i += 8192
+#             f.close()
 
 
 @check_time('main', 'jut_su_parse.py')
