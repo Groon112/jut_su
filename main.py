@@ -2,30 +2,32 @@ from kivy.animation import Animation
 from kivy.properties import ColorProperty, ObjectProperty, BooleanProperty
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.core.window import Window
 from kivy.uix.button import Button
+from kivy.metrics import dp
+from kivy.utils import platform
 from kivy.lang import Builder
 from kivymd.app import MDApp
 from kivymd.uix.recycleview import MDRecycleView
 from kivymd.uix.behaviors.focus_behavior import FocusBehavior
-from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivymd.uix.recyclegridlayout import MDRecycleGridLayout
-
-import json
-
 from kivymd.uix.menu import MDDropdownMenu
-
-from Package import jut_su_parse as j_parse
-from math import ceil
 from kivymd.uix.snackbar import Snackbar
 from kivymd.theming import ThemeManager
-from kivy.metrics import dp
+from Package import jut_su_parse as j_parse
+from math import ceil
+import json
 
-Builder.load_file("../kv/start_window.kv")
+Builder.load_file("kv/start_window.kv")
 BUTTON_HEIGHT = 50
 series_dict = {}
 anime_dict = {}
 select_series = []
+platform_path = ""
+if platform == "android":
+    platform_path = "/data/data/org.jut.su.download.jutsu/files/app/"
+    BUTTON_HEIGHT = 120
 
 
 def write_json(file_name: str, value: dict):
@@ -53,7 +55,7 @@ class Main(Screen):
     # @j_parse.check_time("main", "on enter")
     def on_enter(self):
         global anime_dict
-        anime_dict = load_json('anime_list.json')
+        anime_dict = load_json(platform_path + 'data/anime_list.json')
         b_height = len(anime_dict['film_list']) * BUTTON_HEIGHT
         self.ids.favourites_list.height = b_height
         for i in anime_dict['film_list']:
@@ -163,7 +165,7 @@ class Second(Screen):
             anime_dict['film_list'].remove(temp_dict)
             self.ids.ani.right_action_items = [["star-outline", lambda x: self.add_favourite()],
                                                ["dots-vertical", lambda x: x]]
-        write_json('anime_list.json', anime_dict)
+        write_json(platform_path + 'data/anime_list.json', anime_dict)
 
     def callback(self, button):
         self.menu.caller = button
@@ -471,7 +473,7 @@ class TestApp(MDApp):
     def __init__(self, **kwargs):
         self.theme_cls = ThemeManager()
         self.title = "Jut.su"
-        self.icon = "../Sources/favicon.ico"
+        self.icon = "Sources/favicon.ico"
         super().__init__(**kwargs)
 
     def build(self):

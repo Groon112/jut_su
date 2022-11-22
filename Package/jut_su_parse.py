@@ -24,7 +24,7 @@ def check_time(*a_args: str) -> any:
         def wrapper(*args, **kwargs):
             start = datetime.now()
             result = func(*args, **kwargs)
-            print(f'Фнукция "{" ".join(a_args)}" отработала за: {datetime.now() - start}')
+            print(f'Функция "{" ".join(a_args)}" отработала за: {datetime.now() - start}')
             return result
 
         return wrapper
