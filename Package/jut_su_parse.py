@@ -1,9 +1,8 @@
+import os.path
 import re
 from typing import Optional, Tuple
-
-# import progressbar
+from loguru import logger
 import requests
-# import tqdm
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json
@@ -130,13 +129,11 @@ def get_episodes(soup: BeautifulSoup, anime_global: bool) -> Optional[dict]:
         return links
 
 
-def get_download_link(link: str) -> str:
+def get_download_link(link: str) -> str or None:
     req1 = requests.get(link, headers=headers)
     soup = BeautifulSoup(req1.content, 'html.parser')
     try:
-        if soup.find("source", attrs={"label": "1080p"}).get('src'):
-            download_link = soup.find("source", attrs={"label": "1080p"}).get('src')
-        elif soup.find("source", attrs={"label": "720p"}).get('src'):
+        if soup.find("source", attrs={"label": "720p"}).get('src'):
             download_link = soup.find("source", attrs={"label": "720p"}).get('src')
         elif soup.find("source", attrs={"label": "480p"}).get('src'):
             download_link = soup.find("source", attrs={"label": "480p"}).get('src')
@@ -144,31 +141,41 @@ def get_download_link(link: str) -> str:
             download_link = soup.find("source", attrs={"label": "360p"}).get('src')
         else:
             exit()
-            return ''
+            return None
     except AttributeError:
-        return "Данное видео недоступно для РФ или отсутствуюет"
+        return None
 
     return download_link
 
 
-# def dwn(video: list):
-#     if isinstance(video, list):
-#         for link in tqdm.tqdm(video):
-#             d_video = requests.get(link, stream=True, headers=headers)
-#             file_size = int(d_video.headers['Content-Length'])
-#             bar = progressbar.ProgressBar(maxval=file_size).start()
-#             i = 0
-#             name = str(re.search(r'\d+\.(1080|720|480|360)', str(link)).group())  # Допилить регулярки
-#             f = open(f'onepiece-{name}.mp4', 'wb')
-#             for chunk in d_video.iter_content(chunk_size=8192):
-#                 f.write(chunk)
-#                 bar.update(i)
-#                 i += 8192
-#             f.close()
+@logger.catch()
+def dwn(video: list, path: list):
+    if isinstance(video, list):
+        for link, names in zip(video, path):
+            # d_video = requests.get(link, stream=True, headers=headers)
+            session = requests.Session()
+            d_video = session.get(link, stream=True, headers=headers)
+            d_video.raise_for_status()
+            f = open(f'{names}.mp4', 'wb')
+            file_size = int(d_video.headers['Content-Length'])
+            last = file_size
+            logger.info(f"Начинаем загрузку файла - {names}.mp4. Размер файла - {str(file_size / 1000000)} МБ")
+            t = datetime.now()
+            logger.debug("НАЧАЛО - " + str(t))
+            for chunk in d_video.iter_content(chunk_size=1024):  # chunk_size=8192
+                f.write(chunk)
+                # logger.info(f"Загружено - {last - len(chunk)}")
+                last -= len(chunk)
+            f.close()
+            logger.debug("КОНЕЦ - " + str(datetime.now() - t))
+            if file_size == os.path.getsize(names + ".mp4"):
+                logger.info(f"Файл успешно загружен -- {names}")
+            else:
+                logger.warning(
+                    f"Файл загружен не полностью. Не загрузилось {file_size - os.path.getsize(names + '.mp4')}")
 
 
-@check_time('main', 'jut_su_parse.py')
-def main(start_link: str) -> Optional[dict]:
+def main(start_link: str = None) -> Optional[dict]:
     if re.fullmatch(r'https://jut\.su/.+/', start_link):
         soup, a_global = check_anime_global(start_link)
         if not get_episodes(soup, a_global):

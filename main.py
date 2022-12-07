@@ -1,13 +1,18 @@
+import json
+import os
+import threading
+from loguru import logger
+
 from kivy.animation import Animation
 from kivy.properties import ColorProperty, ObjectProperty, BooleanProperty
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.core.window import Window
 from kivy.uix.button import Button
+from kivy.lang import Builder
 from kivy.metrics import dp
 from kivy.utils import platform
-from kivy.lang import Builder
+from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivymd.app import MDApp
 from kivymd.uix.recycleview import MDRecycleView
 from kivymd.uix.behaviors.focus_behavior import FocusBehavior
@@ -15,9 +20,10 @@ from kivymd.uix.recyclegridlayout import MDRecycleGridLayout
 from kivymd.uix.menu import MDDropdownMenu
 from kivymd.uix.snackbar import Snackbar
 from kivymd.theming import ThemeManager
+
 from Package import jut_su_parse as j_parse
 from math import ceil
-import json
+
 
 Builder.load_file("kv/start_window.kv")
 BUTTON_HEIGHT = 50
@@ -25,9 +31,36 @@ series_dict = {}
 anime_dict = {}
 select_series = []
 platform_path = ""
+download_dir = ""
+
 if platform == "android":
+    from android.permissions import Permission, request_permissions
+
+    def callback(permission, result):
+        if all([res for res in result]):
+            logger.info(f"Got all permissions - {permission}")
+        else:
+            logger.info(f"Did not get all permissions - {permission}")
+
+    request_permissions([Permission.READ_EXTERNAL_STORAGE,
+                         Permission.WRITE_EXTERNAL_STORAGE,
+                         Permission.INTERNET], callback)
+
     platform_path = "/data/data/org.jut.su.download.jutsu/files/app/"
     BUTTON_HEIGHT = 120
+    download_dir = "/storage/emulated/0/Movies/JutSu/"
+
+
+elif platform == "linux":
+    download_dir = "/home/groon/Видео/JutSu/"
+
+elif platform == "windows":
+    download_dir = "C:/JutSu/"
+
+if not os.path.exists(download_dir):
+    os.makedirs(download_dir)
+
+logger.add(download_dir + "debug.log", format="{time} {level} {message}", level="DEBUG", rotation="100 MB")
 
 
 def write_json(file_name: str, value: dict):
@@ -41,19 +74,20 @@ def load_json(file_name: str):
     return value
 
 
-def bad_link():
-    Snackbar(text="Вставьте корректную ссылку!",
+def bad_link(text: str):
+    logger.warning(text)
+    Snackbar(text=text,
              snackbar_x="20dp",
              snackbar_y="20dp",
-             size_hint_x=(Window.width - 40) / Window.width).open()
+             size_hint_x=(Window.width - (dp(20) * 2)) / Window.width).open()
 
 
 class Main(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    # @j_parse.check_time("main", "on enter")
     def on_enter(self):
+        logger.info("Открылся main screen")
         global anime_dict
         anime_dict = load_json(platform_path + 'data/anime_list.json')
         b_height = len(anime_dict['film_list']) * BUTTON_HEIGHT
@@ -67,16 +101,18 @@ class Main(Screen):
     def pressing(self, instance):
         global series_dict
         for i in anime_dict['film_list']:
-            if i['name'] == instance.text:
-                data = j_parse.main(i['link'])
-                if data:
-                    series_dict = data
-                    self.manager.transition.direction = 'left'
-                    self.manager.current = 'second'
-                else:
-                    bad_link()
+            try:
+                if i['name'] == instance.text:
+                    data = j_parse.main(i['link'])
+                    if data:
+                        series_dict = data
+                        self.manager.transition.direction = 'left'
+                        self.manager.current = 'second'
+                    else:
+                        bad_link("Введите корректную ссылку!")
+            except Exception as e:
+                logger.exception(e)
 
-    # @j_parse.check_time("check for link")
     def find_by_link(self):
         global series_dict
         a = j_parse.main(self.ids.input_name.text)
@@ -84,7 +120,7 @@ class Main(Screen):
             series_dict = a
             self.manager.current = 'second'
         else:
-            bad_link()
+            bad_link("Введите корректную ссылку!")
 
 
 class Second(Screen):
@@ -137,10 +173,11 @@ class Second(Screen):
         if self.manager.current != 'Second':
             series_dict["select_season"] = instance.text
             self.manager.transition.direction = 'left'
-            if len(series_dict[instance.text]['series'].keys()) > 50:
-                self.manager.current = 'RVScreen'
-            else:
-                self.manager.current = self.manager.next()
+            self.manager.current = 'RVScreen'
+            # if len(series_dict[instance.text]['series'].keys()) > 50:
+            #     self.manager.current = 'RVScreen'
+            # else:
+            #     self.manager.current = self.manager.next()
 
     def on_leave(self):
         self.ids.season_list.clear_widgets()
@@ -205,7 +242,6 @@ class Third(Screen):
             width_mult=4,
         )
 
-    # @j_parse.check_time('third enter')
     def on_enter(self, *args):
         self.ids.svw.scroll_y = 1
         select_season = None
@@ -288,36 +324,6 @@ class Third(Screen):
             self.ids.ani.title = str(
                 len(instance_selection_list.get_selected_list_items())
             )
-
-
-# class Fourth(Screen):  # Для примера. Нужно переделать
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         self.list_buttons = [
-#             '7', '8', '9',
-#             '4', '5', '6',
-#             '1', '2', '3',
-#             'None', '0', 'None',
-#         ]
-#
-#     def on_enter(self, *args):
-#         self.ids.series_list.refreshView()
-#         self.ids.ani.title = series_dict['select_season']
-#
-#     def on_leave(self, *args):
-#         self.ids.series_list.scroll_y = 1
-#         self.ids.ani.title = ''
-#
-#     def pressing(self, instance):
-#         self.manager.current = 'third'
-#
-#     def set_previous_screen(self):
-#         if self.manager.current != 'third':
-#             self.manager.transition.direction = 'right'
-#             self.manager.current = 'second'
-#
-#     def callback(self, button):
-#         pass
 
 
 class CustomButton(Button):
@@ -452,8 +458,35 @@ class RVScreen(Screen):
         for season in series_list:
             if series_dict['select_season'] == series_dict[season]['name']:
                 select_season = series_dict[season]['series']
-        select_series = ([list(select_season.keys())[int(x)] for x in select_series])
+        select_series_with_name = ([list(select_season.keys())[int(x)] for x in select_series])
+        """С этого момента нужно делать мультипоточность или мультипроцессорность"""
+        threading.Thread(target=self.download_series, args=(select_season, select_series_with_name)).start()
         self.menu.dismiss()
+
+    def download_series(self, select_season, select_series_with_name):
+        link = []
+        name = []
+        bad_series = []
+        for series in select_series_with_name:
+            download_link = j_parse.get_download_link(select_season[series])
+            if download_link:
+                logger.info(f"Пытаемся скачать по ссылке - {download_link}\n Серия - {series}")
+                link.append(j_parse.get_download_link(select_season[series]))
+                name.append(download_dir + series_dict['name'] + " " + series_dict['select_season'] + " " + series)
+            else:
+                # log_all(series_dict.get('select_season') + " " + series)
+                logger.error(f"Не удалось получить ссылку на скачивание - {select_season[series]}")
+                bad_series.append(series_dict.get('select_season') + " " + series)
+
+        # print(name, link)
+        # print(bad_series)
+        if name and link:
+            logger.info(f"Вызываем загрузку в main файле. имя - {name}")
+            j_parse.dwn(link, name)
+            if bad_series:
+                logger.warning("Следующие серии недоступны для РФ:\n" + "\n".join(bad_series))
+        else:
+            logger.warning("Все серии недоступны для РФ")
 
     def select_all(self, item):
         self.menu.dismiss()
@@ -487,4 +520,5 @@ class TestApp(MDApp):
 
 
 if __name__ == "__main__":
+    logger.info("Приложение запустилось")
     TestApp().run()
