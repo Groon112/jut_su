@@ -1,11 +1,13 @@
 import os.path
 import re
+# import socket
 from typing import Optional, Tuple
 from loguru import logger
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json
+# from main import RVScreen
 
 links = {}
 down_links = []
@@ -78,7 +80,7 @@ def get_episodes(soup: BeautifulSoup, anime_global: bool) -> Optional[dict]:
                 # Находим номер сезона для серии
                 season_title = int(re.search(r'\d+', season).group())
                 if season_titles[season_title - 1] not in links.keys():
-                    # Минус 1, т.к. s_title - это номер сезона. s_titles же - список сезонов.
+                    # Минус 1, т.к. s_title - это номер сезона s_titles же - список сезонов.
                     # Чтобы найти нужный - вычитаем 1, т.к. отсчёт идёт с нуля.
                     links.update(
                         {season_titles[season_title - 1]: {"name": season_titles[season_title - 1], 'series': {}}})
@@ -140,7 +142,7 @@ def get_download_link(link: str) -> str or None:
         elif soup.find("source", attrs={"label": "360p"}).get('src'):
             download_link = soup.find("source", attrs={"label": "360p"}).get('src')
         else:
-            exit()
+            # exit()
             return None
     except AttributeError:
         return None
@@ -148,31 +150,50 @@ def get_download_link(link: str) -> str or None:
     return download_link
 
 
-@logger.catch()
+@logger.catch
 def dwn(video: list, path: list):
     if isinstance(video, list):
         for link, names in zip(video, path):
-            # d_video = requests.get(link, stream=True, headers=headers)
-            session = requests.Session()
-            d_video = session.get(link, stream=True, headers=headers)
-            d_video.raise_for_status()
-            f = open(f'{names}.mp4', 'wb')
-            file_size = int(d_video.headers['Content-Length'])
-            last = file_size
-            logger.info(f"Начинаем загрузку файла - {names}.mp4. Размер файла - {str(file_size / 1000000)} МБ")
-            t = datetime.now()
-            logger.debug("НАЧАЛО - " + str(t))
-            for chunk in d_video.iter_content(chunk_size=1024):  # chunk_size=8192
-                f.write(chunk)
-                # logger.info(f"Загружено - {last - len(chunk)}")
-                last -= len(chunk)
-            f.close()
-            logger.debug("КОНЕЦ - " + str(datetime.now() - t))
-            if file_size == os.path.getsize(names + ".mp4"):
-                logger.info(f"Файл успешно загружен -- {names}")
-            else:
-                logger.warning(
-                    f"Файл загружен не полностью. Не загрузилось {file_size - os.path.getsize(names + '.mp4')}")
+            if not download_list_of_series(link, names):
+                download_list_of_series(link, names)
+    logger.info(f"Успешно загружены серии - {path}")
+
+
+def download_list_of_series(link: str, name: str):
+    try:
+        session = requests.Session()
+        d_video = session.get(link, stream=True, headers=headers)
+        d_video.raise_for_status()
+        f = open(f'{name}.mp4', 'wb')
+        file_size = int(d_video.headers['Content-Length'])
+        last = file_size
+        logger.info(f"Начинаем загрузку файла - {name}.mp4. Размер файла - {str(file_size / 1000000)} МБ")
+        t = datetime.now()
+        for chunk in d_video.iter_content(chunk_size=1024):  # chunk_size=8192
+            f.write(chunk)
+            last -= len(chunk)
+            # RVScreen.ids.p_bar += 1
+        f.close()
+        logger.debug("Время загрузки: " + str(datetime.now() - t))
+        if file_size == os.path.getsize(name + ".mp4"):
+            logger.info(f"Файл успешно загружен - {name}.mp4")
+            return True
+        else:
+            logger.warning(f"Файл загружен не полностью. Не загрузилось {file_size - os.path.getsize(name + '.mp4')}")
+            return False
+    except ConnectionAbortedError:
+        logger.warning("ConnectionAbortedError")
+        return False
+
+    except requests.exceptions.ChunkedEncodingError:
+        logger.warning("ChunkedEncodingError")
+        return False
+    # except socket.gaierror:
+    #     logger.warning("socket.gaierror")
+    #     return False
+    except FileNotFoundError:
+        logger.warning("socket.gaierror")
+        return False
 
 
 def main(start_link: str = None) -> Optional[dict]:

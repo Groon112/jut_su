@@ -70,36 +70,36 @@
                 padding: 10
 
 
-<Third>:
-    BoxLayout:
-        id: series_list
-        orientation:'vertical'
-        spacing: 10
-        MDTopAppBar:
-            id: ani
-            md_bg_color: "gray"
-            left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
-            right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
-
-        ScrollView:
-            id: svw
-            scroll_type: ["bars", "content"]
-            always_overscroll: False
-            height:root.height*0.8
-            smooth_scroll_end: 10
-            bar_width: 5
-
-            MDSelectionList:
-                id: series_list
-                padding: 10
-                cols: 4
-                progress_round_size: 0
-                overlay_color: root.overlay_color[:-1] + [.1]
-                icon_bg_color: "#bcbcbc"
-                progress_round_color: root.progress_round_color
-                on_selected: root.on_selected(*args)
-                on_unselected: root.on_unselected(*args)
-                on_selected_mode: root.set_selection_mode(*args)
+#<Third>:
+#    BoxLayout:
+#        id: series_list
+#        orientation:'vertical'
+#        spacing: 10
+#        MDTopAppBar:
+#            id: ani
+#            md_bg_color: "gray"
+#            left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
+#            right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
+#
+#        ScrollView:
+#            id: svw
+#            scroll_type: ["bars", "content"]
+#            always_overscroll: False
+#            height:root.height*0.8
+#            smooth_scroll_end: 10
+#            bar_width: 5
+#
+#            MDSelectionList:
+#                id: series_list
+#                padding: 10
+#                cols: 4
+#                progress_round_size: 0
+#                overlay_color: root.overlay_color[:-1] + [.1]
+#                icon_bg_color: "#bcbcbc"
+#                progress_round_color: root.progress_round_color
+#                on_selected: root.on_selected(*args)
+#                on_unselected: root.on_unselected(*args)
+#                on_selected_mode: root.set_selection_mode(*args)
 
 <ScrollerSeries>:
     viewclass: "CustomButton"
@@ -150,11 +150,15 @@
 <RVScreen>:
     BoxLayout:
         orientation: "vertical"
-        spacing: 10
+        spacing: 5
         MDTopAppBar:
             id: ani
             md_bg_color: "gray"
             left_action_items: [["arrow-left", lambda x: root.set_previous_screen()]]
             right_action_items: [["dots-vertical", lambda x: root.callback(x)]]
+        MDProgressBar:
+            id: p_bar
+            size_hint: (1, .003)
+            value: 0
         RV:
             id: series_list
