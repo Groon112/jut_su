@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import os
 import threading
@@ -454,25 +455,34 @@ class RVScreen(Screen):
         name = []
         bad_series = []
         self.ids.p_bar.value = 0
-        # self.ids.p_bar.max = len(select_series_name)
-        self.ids.p_bar.max = 1000000
         for series in select_series_name:
             download_link = j_parse.get_download_link(select_season[series])
             if download_link:
-                logger.info(f"Пытаемся скачать по ссылке - {download_link}\n Серия - {series}")
-                link.append(j_parse.get_download_link(select_season[series]))
-                name.append(download_dir + series_dict['name'] + " " + series_dict['select_season'] + " " + series)
+                # logger.info(f"Серия - {series}. Download link - {download_link}")
+                link.append(download_link)
+                name.append(f"{download_dir}{series_dict['name']} {series_dict['select_season']} {series}")
             else:
                 logger.error(f"Не удалось получить ссылку на скачивание - {select_season[series]}")
-                bad_series.append(series_dict.get('select_season') + " " + series)
+                bad_series.append(series)
 
-        if name and link:
-            logger.info(f"Вызываем загрузку в main файле. имя - {name}")
-            j_parse.dwn(link, name)
-            if bad_series:
-                logger.warning("Следующие серии недоступны для РФ: " + "; ".join(bad_series))
-        else:
-            logger.warning("Все серии недоступны для РФ")
+        if bad_series and not name and not link:
+            logger.warning("Не удалось получить ссылки на скачивание.")
+            return
+        elif bad_series and name and link:
+            logger.warning(f"Не удалось получить ссылки: {'; '.join(bad_series)}")
+
+        logger.info(f"Начало загрузки серий - {name}")
+        # _time = datetime.now()
+        #
+        # _size = 0
+        # for i, l in enumerate(link):
+        #     one_size = j_parse.get_file_size(l)
+        #     # print(f"{i}:  {str(one_size/1000000)} Мб")
+        #     _size += one_size
+        # print(f"Общий размер: {str(_size/1000000)} Мб")
+        #
+        # print(datetime.now() - _time)
+        j_parse.dwn(link, name)
 
     def select_all(self, item):
         self.menu.dismiss()

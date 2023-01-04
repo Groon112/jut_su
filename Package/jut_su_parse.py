@@ -1,13 +1,12 @@
 import os.path
 import re
-# import socket
 from typing import Optional, Tuple
 from loguru import logger
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 import json
-# from main import RVScreen
+
 
 links = {}
 down_links = []
@@ -152,11 +151,16 @@ def get_download_link(link: str) -> str or None:
 
 @logger.catch
 def dwn(video: list, path: list):
+    # logger.info(video)
     if isinstance(video, list):
         for link, names in zip(video, path):
             if not download_list_of_series(link, names):
                 download_list_of_series(link, names)
     logger.info(f"Успешно загружены серии - {path}")
+
+
+def get_file_size(link: str) -> int:
+    return int(requests.get(link, stream=True, headers=headers).headers['Content-Length'])
 
 
 def download_list_of_series(link: str, name: str):
@@ -172,7 +176,6 @@ def download_list_of_series(link: str, name: str):
         for chunk in d_video.iter_content(chunk_size=1024):  # chunk_size=8192
             f.write(chunk)
             last -= len(chunk)
-            # RVScreen.ids.p_bar += 1
         f.close()
         logger.debug("Время загрузки: " + str(datetime.now() - t))
         if file_size == os.path.getsize(name + ".mp4"):
@@ -188,11 +191,13 @@ def download_list_of_series(link: str, name: str):
     except requests.exceptions.ChunkedEncodingError:
         logger.warning("ChunkedEncodingError")
         return False
-    # except socket.gaierror:
-    #     logger.warning("socket.gaierror")
-    #     return False
+
+    except requests.exceptions.HTTPError:
+        logger.warning("requests.exceptions.HTTPError")
+        return False
+
     except FileNotFoundError:
-        logger.warning("socket.gaierror")
+        logger.warning("FileNotFoundError")
         return False
 
 
