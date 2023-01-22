@@ -1,12 +1,12 @@
+import json
 import os.path
 import re
+from datetime import datetime
 from typing import Optional, Tuple
-from loguru import logger
+
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
-import json
-
+from loguru import logger
 
 links = {}
 down_links = []

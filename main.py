@@ -1,25 +1,24 @@
-from datetime import datetime
 import json
 import os
 import threading
-from loguru import logger
 
-from kivy.properties import ObjectProperty, BooleanProperty
-from kivy.uix.recycleview.views import RecycleDataViewBehavior
-from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
-from kivy.uix.button import Button
 from kivy.lang import Builder
 from kivy.metrics import dp
-from kivy.utils import platform
+from kivy.properties import ObjectProperty, BooleanProperty
+from kivy.uix.button import Button
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.utils import platform
 from kivymd.app import MDApp
-from kivymd.uix.recycleview import MDRecycleView
-from kivymd.uix.behaviors.focus_behavior import FocusBehavior
-from kivymd.uix.recyclegridlayout import MDRecycleGridLayout
-from kivymd.uix.menu import MDDropdownMenu
-from kivymd.uix.snackbar import Snackbar
 from kivymd.theming import ThemeManager
+from kivymd.uix.behaviors.focus_behavior import FocusBehavior
+from kivymd.uix.menu import MDDropdownMenu
+from kivymd.uix.recyclegridlayout import MDRecycleGridLayout
+from kivymd.uix.recycleview import MDRecycleView
+from kivymd.uix.snackbar import Snackbar
+from loguru import logger
 
 from Package import jut_su_parse as j_parse
 
@@ -52,7 +51,7 @@ if platform == "android":
 elif platform == "linux":
     download_dir = "/home/groon/Видео/JutSu/"
 
-elif platform == "windows":
+else:
     download_dir = "C:/JutSu/"
 
 if not os.path.exists(download_dir):
@@ -206,119 +205,6 @@ class Second(Screen):
         self.menu.dismiss()
 
 
-# class Third(Screen):
-#     overlay_color = ColorProperty("#5b5b5b")
-#     default_color = ColorProperty("#808080")
-#     progress_round_color = "#bcbcbc"
-#
-#     def __init__(self, **kwargs):
-#         super().__init__(**kwargs)
-#         self.season = {}
-#         self.series_name = ""
-#         self.selection_series = []
-#         menu_items = [
-#             {
-#                 "viewclass": "OneLineListItem",
-#                 "text": "Скачать всё",
-#                 "height": dp(56),
-#                 "on_release": lambda x="Скачать всё": self.select_all(x)
-#             },
-#             {
-#                 "viewclass": "OneLineListItem",
-#                 "text": "Выбрать серии",
-#                 "height": dp(56),
-#                 "on_release": lambda x="Выбрать серии": self.menu_callback(x)
-#             }
-#         ]
-#         self.menu = MDDropdownMenu(
-#             items=menu_items,
-#             width_mult=4,
-#         )
-#
-#     def on_enter(self, *args):
-#         self.ids.svw.scroll_y = 1
-#         select_season = None
-#         self.ids.ani.title = series_dict['select_season']
-#         series_list = list(series_dict.keys())[5:]
-#         for season in series_list:
-#             if series_dict['select_season'] == series_dict[season]['name']:
-#                 select_season = series_dict[season]['series']
-#
-#         b_height = ceil((len(select_season) / 4)) * BUTTON_HEIGHT
-#         self.ids.series_list.height = b_height + 5
-#         for series in select_season:
-#             if len(series) > 29 and self.ids.series_list.cols != 1:
-#                 self.ids.series_list.cols = 1
-#             b_height -= BUTTON_HEIGHT
-#             self.ids.series_list.add_widget(Button(text=series, on_release=self.pressing, size_hint=(1, None),
-#                                                    height=BUTTON_HEIGHT))
-#
-#     def set_previous_screen(self):
-#         if self.manager.current != 'second':
-#             self.manager.transition.direction = 'right'
-#             self.manager.current = self.manager.previous()
-#
-#     def pressing(self, instance):
-#         global series_dict
-#         if self.manager.current != 'Second':
-#             series_dict["select_series"] = instance.text
-#             self.manager.transition.direction = 'left'
-#
-#     def on_leave(self):
-#         self.ids.series_list.clear_widgets()
-#         self.ids.ani.title = ''
-#
-#     def download(self, link_list):
-#         s = [i.instance_item.text for i in self.selection_series]
-#         # print(link_list)
-#         # print(s)
-#
-#     def select_all(self, item):
-#         self.ids.series_list.selected_all()
-#         self.menu.dismiss()
-#
-#     def callback(self, button):
-#         self.menu.caller = button
-#         self.menu.open()
-#
-#     def menu_callback(self, text_item):
-#         self.menu.dismiss()
-#         # print(text_item)
-#
-#     def set_selection_mode(self, instance_selection_list, mode):
-#         if mode:
-#             md_bg_color = self.overlay_color
-#             left_action_items = [
-#                 [
-#                     "close",
-#                     lambda x: self.ids.series_list.unselected_all(),
-#                 ]
-#             ]
-#             right_action_items = [["download", lambda x: self.download(x)], ["dots-vertical"]]
-#         else:
-#             md_bg_color = self.default_color
-#             left_action_items = [["arrow-left", lambda x: self.set_previous_screen()]]
-#             right_action_items = [["magnify", lambda x: self.download(x)],
-#                                   ["dots-vertical", lambda x: self.callback(x)]]
-#             self.ids.ani.title = series_dict['select_season']
-#
-#         Animation(md_bg_color=md_bg_color, d=.5).start(self.ids.ani)
-#         self.ids.ani.left_action_items = left_action_items
-#         self.ids.ani.right_action_items = right_action_items
-#
-#     def on_selected(self, instance_selection_list, instance_selection_item):
-#         self.ids.ani.title = str(
-#             len(instance_selection_list.get_selected_list_items())
-#         )
-#         self.selection_series = instance_selection_list.get_selected_list_items()
-#
-#     def on_unselected(self, instance_selection_list, instance_selection_item):
-#         if instance_selection_list.get_selected_list_items():
-#             self.ids.ani.title = str(
-#                 len(instance_selection_list.get_selected_list_items())
-#             )
-
-
 class CustomButton(Button):
     root_widget = ObjectProperty()
 
@@ -446,7 +332,6 @@ class RVScreen(Screen):
             if series_dict['select_season'] == series_dict[season]['name']:
                 select_season = series_dict[season]['series']
         select_series_with_name = ([list(select_season.keys())[int(x)] for x in select_series])
-        """С этого момента нужно делать мультипоточность или мультипроцессорность"""
         threading.Thread(target=self.download_series, args=(select_season, select_series_with_name)).start()
         self.menu.dismiss()
 
@@ -510,7 +395,6 @@ class TestApp(MDApp):
         sm = ScreenManager()
         sm.add_widget(Main(name='first'))
         sm.add_widget(Second(name='second'))
-        # sm.add_widget(Third(name='third'))
         sm.add_widget(RVScreen(name='RVScreen'))
         return sm
 
